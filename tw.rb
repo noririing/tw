@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 # coding: utf-8
 
-require "twitter"
+#require "twitter"
+require "tweetstream"
+require "time"
 require "yaml"
 
 twconf = YAML.load_file("tw.yml")
@@ -20,17 +22,14 @@ end
 #  end
 #end
 
-topics = ["スタバ"]
-client.filter(:track => topics.join(",") ) do |status|
-  if status.user.lang == "ja" && !status.text.index("RT")
-    puts "#{status.user.screen_name}: #{status.text}"
+csv_f = File.open("tw.csv","a")
+
+topics = ["スタバ","starbucks","スターバックス","ドトール","ベローチェ","タリーズ","tullys","コメダ","ルノアール","サンマルクカフェ","サンマルク","プロント","エクセルシオール","。"]
+client.filter(:track => topics.join(",") ) do |obj|
+  if obj.user.lang == "ja" && !obj.text.index("RT")
+    csv_f.write("\"#{Time.parse(obj.created_at.to_s).getlocal}\"\,\"#{obj.user.screen_name}\"\,\"#{obj.text.gsub(/(\s|\,|\"|\')/," ")}\"\n")
+    csv_f.flush
   end
 end
 
-#client.filter( :locations => '132.2,29.9,146.2,39.0,138.4,33.5,146.1,46.20' ) do | object |
-#  if object.is_a?(Twitter::Tweet)
-#    if object.lang == "ja" && object.user.lang == "ja"  && !object.retweeted?
-#        print #{object.created_at} , #{object.user.name.chomp} , #{object.text.chomp}
-#    end
-#  end
-#end
+csv_f.close
