@@ -14,22 +14,22 @@ client = Twitter::Streaming::Client.new do | config |
   config.access_token_secret        =  twconf["access_token_secret"]
 end
 
-#client.sample do |object|
-#  if object.is_a?(Twitter::Tweet)
-#    if object.lang == "ja" && object.user.lang == "ja"  && !object.retweeted?
-#      print #{object.created_at} , #{object.user.name.chomp} , #{object.text.chomp}
-#    end
-#  end
-#end
-
-csv_f = File.open("tw.csv","a")
-
-topics = ["スタバ","starbucks","スターバックス","ドトール","ベローチェ","タリーズ","tullys","コメダ","ルノアール","サンマルクカフェ","サンマルク","プロント","エクセルシオール","。"]
-client.filter(:track => topics.join(",") ) do |obj|
-  if obj.user.lang == "ja" && !obj.text.index("RT")
-    csv_f.write("\"#{Time.parse(obj.created_at.to_s).getlocal}\"\,\"#{obj.user.screen_name}\"\,\"#{obj.text.gsub(/(\s|\,|\"|\')/," ")}\"\n")
-    csv_f.flush
+topics = []
+File.open("keywords.txt") do  | f |
+  f.each_line do | line |
+    topics.push(line.chomp!)
   end
 end
 
-csv_f.close
+begin
+  csv_f = File.open("tw.csv","a")
+  client.filter(:track => topics.join(",") ) do |obj|
+    if obj.user.lang == "ja" && !obj.text.index("RT")
+      csv_f.write("\"#{Time.parse(obj.created_at.to_s).getlocal}\"\,\"#{obj.user.screen_name}\"\,\"#{obj.text.gsub(/(\s|\,|\"|\')/," ")}\"\n")
+      csv_f.flush
+    end
+  end
+rescue
+  csv_f.close
+  retry
+end

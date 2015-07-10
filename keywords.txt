@@ -1,0 +1,20 @@
+SAP
+oracle
+microsoft
+SQL Server
+DB2
+IBM
+mysql
+postgress
+java
+ruby
+python
+golang
+perl
+swift
+clang
+spark
+hadoop
+hive
+yarn
+bigdata
